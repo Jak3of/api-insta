@@ -16,7 +16,7 @@ ENV COMPOSER_ALLOW_SUPERUSER 1
 RUN docker-php-ext-install pdo_mysql
 
 # Copiamos los archivos de la aplicación al contenedor
-COPY ./src /var/www/html/
+COPY . /var/www/html/
 
 # Instalamos las dependencias de la aplicación usando Composer
 RUN composer install --no-interaction --optimize-autoloader
