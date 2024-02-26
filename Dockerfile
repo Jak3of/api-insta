@@ -9,6 +9,9 @@ RUN apt-get update && apt-get install -y \
 # Instalamos Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
+# Permitimos que Composer se ejecute como superusuario
+ENV COMPOSER_ALLOW_SUPERUSER 1
+
 # Instalamos las extensiones necesarias de PHP
 RUN docker-php-ext-install pdo_mysql
 
