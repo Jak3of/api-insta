@@ -3,3 +3,50 @@ controllers:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
+
+# /api => ROLE_USER
+# /admin => ROLE_ADMIN
+# / => PUBLIC_ACCESS
+# /api/login_check => LOGIN_CHECK
+# /api/login => LOGIN
+
+app-home:
+    path: /
+    controller: App\Controller\HomeController::index
+
+
+
+app-user:
+    path: /api/users/{page}
+    controller: App\Controller\UserController::index
+    defaults:
+        page: 1
+
+app-user-id:
+    path: /api/users/get/{id}
+    controller: App\Controller\UserController::show
+
+api_login_check:
+    path: /api/login
+    methods: POST
+    
+
+register:
+    path: /register
+    controller: App\Controller\HomeController::register
+    methods: POST
+
+get-image:
+    path: /getimage/{filename}
+    controller: App\Controller\HomeController::getImage
+
+
+get-image-posts:
+    path: /api/getimageposts/{filename}
+    controller: App\Controller\ImageController::getPosts
+
+get-posts:
+    path: /api/getposts/{page}
+    controller: App\Controller\ImageController::index
+    defaults:
+        page: 1
