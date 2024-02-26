@@ -42,7 +42,7 @@ get-image:
 
 
 get-image-posts:
-    path: /api/getimageposts/{filename}
+    path: /getimageposts/{filename}
     controller: App\Controller\ImageController::getPosts
 
 get-posts:

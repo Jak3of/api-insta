@@ -1,19 +1,20 @@
 version: '3'
-
 services:
-###> doctrine/doctrine-bundle ###
-  database:
-    image: mariadb:10.11.6
-    environment:
-      MYSQL_ROOT_PASSWORD: 123456
-      MYSQL_DATABASE: lll
-    volumes:
-      - database_data:/var/lib/mysql
-      # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
-      # - ./docker/db/data:/var/lib/postgresql/data:rw
-###< doctrine/doctrine-bundle ###
+    # Define el servicio web
+    web:
+        build: .
+        ports:
+            - "8080:80"
+        depends_on:
+            - db
 
-volumes:
-###> doctrine/doctrine-bundle ###
-  database_data:
-###< doctrine/doctrine-bundle ###
+    # Define el servicio de la base de datos
+    db:
+        image: mysql:8
+        environment:
+            MYSQL_DATABASE: lll
+            MYSQL_USER: root
+            MYSQL_PASSWORD: 123456
+            MYSQL_ROOT_PASSWORD: root
+        ports:
+            - "3306:3306"
