@@ -1,39 +1,36 @@
-# Utilizamos una imagen oficial de PHP 8.1 como imagen base
-FROM php:8.3-apache
+# Use an official PHP Apache image as the base
+FROM php:8.0-apache
 
-# Instalamos los paquetes necesarios
-RUN apt-get update && apt-get install -y \
+# Set the working directory in the container
+WORKDIR /var/www/html
+
+# Copy the application files to the container
+COPY ./src /var/www/html/
+
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y \
     git \
-    curl \
-    vim \
-    unzip \
-    && rm -rf /var/lib/apt/lists/*
+    unzip
 
-# Configuramos los módulos de PHP
+# Cambiamos el ID del usuario www-data a 1000
+RUN usermod -u 1000 www-data
+
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Install PHP extensions required by your application
 RUN docker-php-ext-install pdo pdo_mysql
 
-# Habilita mod_rewrite
+# Install application dependencies using Composer
+RUN composer install --no-interaction --optimize-autoloader
+
+# Set up Apache virtual host
+COPY apache.conf /etc/apache2/sites-available/000-default.conf
 RUN a2enmod rewrite
 
-# Establecemos la raíz web de Apache en el directorio público del proyecto
-RUN sed -ri -e 's!/var/www/html!$ {APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
-RUN sed -ri -e 's!/var/www/!$ {APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
-ENV APACHE_DOCUMENT_ROOT /var/www/html/public
-
-# Copiamos nuestra aplicación a la carpeta de trabajo del contenedor
-COPY . /var/www/html/
-
-# Establecemos la carpeta de trabajo
-WORKDIR /var/www/html/
-
-# Ejecutamos los comandos necesarios para instalar las dependencias de PHP y ejecutar nuestro proyecto
-RUN curl -sS https://getcomposer.org/installer | php \
-    && php composer.phar install \
-    && chown -R www-data:www-data /var/www/html \
-    && chmod -R 777 /var/www/html/var
-
-# Exponemos el puerto 80 para el tráfico HTTP
-EXPOSE 80
-
-# Iniciamos el servidor Apache en primer plano
+# Start Apache server
 CMD ["apache2-foreground"]
+
+
+
