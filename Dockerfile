@@ -1,36 +1,43 @@
-# Use an official PHP Apache image as the base
-FROM php:8.0-apache
+# Utilizamos una imagen oficial de PHP 8.3 con Apache como imagen base
+FROM php:8.3-apache
 
-# Set the working directory in the container
-WORKDIR /var/www/html
+# Instalamos los paquetes necesarios
+RUN apt-get update && apt-get install -y \
+    curl \
+    vim \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy the application files to the container
-COPY ./src /var/www/html/
+# Configuramos los módulos de PHP
+RUN docker-php-ext-install pdo pdo_mysql
 
-# Install system dependencies
-RUN apt-get update && \
-    apt-get install -y \
-    git \
-    unzip
+# Habilita mod_rewrite
+RUN a2enmod rewrite
+
+ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+# Establecemos la raíz web de Apache en el directorio público del proyecto
+RUN sed -ri -e 's!/var/www/html!$ {APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!$ {APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
+# Instalamos y habilitamos Xdebug
+RUN pecl install xdebug \
+    && rm -rf /tmp/pear \
+    && docker-php-ext-enable xdebug
 
 # Cambiamos el ID del usuario www-data a 1000
 RUN usermod -u 1000 www-data
 
-# Install Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+# Copiamos nuestra aplicación a la carpeta de trabajo del contenedor
+COPY . /var/www/html/
 
-# Install PHP extensions required by your application
-RUN docker-php-ext-install pdo pdo_mysql
+# Establecemos la carpeta de trabajo
+WORKDIR /var/www/html/
 
-# Install application dependencies using Composer
-RUN composer install --no-interaction --optimize-autoloader
+# Copiamos la configuración de Xdebug
+COPY ./docker/xdebug/xdebug.ini $PHP_INI_DIR/conf.d/docker-php-ext-xdebug.ini
 
-# Set up Apache virtual host
-COPY apache.conf /etc/apache2/sites-available/000-default.conf
-RUN a2enmod rewrite
+# Exponemos el puerto 80 para el tráfico HTTP
+EXPOSE 80
 
-# Start Apache server
+# Iniciamos el servidor Apache en primer plano
 CMD ["apache2-foreground"]
-
-
-
