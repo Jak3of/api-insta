@@ -14,11 +14,12 @@ class Comment
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read' , 'post:read','comment:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'comments')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups([ 'post:read','comment:read'])]
     private ?User $user = null;
 
     #[Groups(['user:read'])]
@@ -26,15 +27,15 @@ class Comment
     #[ORM\JoinColumn(nullable: false)]
     private ?Image $image = null;
 
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'post:read','comment:read'])]
     #[ORM\Column(type: Types::TEXT)]
     private ?string $content = null;
 
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'post:read','comment:read'])]
     #[ORM\Column]
     private ?\DateTimeImmutable $created_at = null;
 
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'post:read','comment:read'])]
     #[ORM\Column]
     private ?\DateTimeImmutable $updated_at = null;
 

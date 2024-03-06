@@ -60,6 +60,7 @@ class HomeController extends AbstractController
         $user->setImage('default.png');
         $user->setCreatedAt(new \DateTimeImmutable());
         $user->setUpdatedAt(new \DateTimeImmutable());
+        $user->setRememberToken("token");
 
         $errors = $this->validator->validate($user);
 
@@ -118,6 +119,19 @@ class HomeController extends AbstractController
         }
         return new JsonResponse(['message' => 'Image not found'], Response::HTTP_NOT_FOUND);
     }
+
+    public function auth(Request $request)
+    {
+        return new JsonResponse(
+            [
+                'message' => 'Your are logged in!',
+                'token' => $request->headers->get('Authorization'),
+                'status' => Response::HTTP_OK
+            ], Response::HTTP_OK
+        );
+    }
+
+    
 
     
 }

@@ -20,53 +20,53 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user:read', 'user:write', 'user:identifier','image:read'])]
+    #[Groups(['user:read', 'user:write', 'user:identifier', 'image:read', 'post:read','comment:read','viewuser:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 20)]
     #[Groups(['user:read', 'user:write'])]
-    #[Assert\Choice(choices: ['user', 'admin'] , message: 'The role must be user or admin.')]
+    #[Assert\Choice(choices: ['user', 'admin'], message: 'The role must be user or admin.')]
     private ?string $role = null;
 
     #[ORM\Column(length: 100)]
-    #[Groups(['user:read', 'user:write', 'user:identifier','image:read'])]
-    #[Assert\NotBlank (message: 'The name cannot be empty.')]
-    #[Assert\Length(min: 3, max: 100 , minMessage: 'The name must be at least 3 characters long', maxMessage: 'The name must be at most 100 characters long')]
+    #[Groups(['user:read', 'user:write', 'user:identifier', 'image:read', 'post:read','comment:read','viewuser:read'])]
+    #[Assert\NotBlank(message: 'The name cannot be empty.')]
+    #[Assert\Length(min: 3, max: 100, minMessage: 'The name must be at least 3 characters long', maxMessage: 'The name must be at most 100 characters long')]
     private ?string $name = null;
 
     #[ORM\Column(length: 200)]
-    #[Groups(['user:read', 'user:write', 'user:identifier','image:read'])]
-    #[Assert\NotBlank (message: 'The surname cannot be empty.')]
-    #[Assert\Length(min: 3, max: 200 , minMessage: 'The surname must be at least 3 characters long', maxMessage: 'The surname must be at most 200 characters long')]
+    #[Groups(['user:read', 'user:write', 'user:identifier', 'image:read', 'post:read','comment:read','viewuser:read'])]
+    #[Assert\NotBlank(message: 'The surname cannot be empty.')]
+    #[Assert\Length(min: 3, max: 200, minMessage: 'The surname must be at least 3 characters long', maxMessage: 'The surname must be at most 200 characters long')]
     private ?string $surname = null;
 
     #[ORM\Column(length: 100)]
-    #[Groups(['user:read', 'user:write', 'user:identifier','image:read'])]
-    #[Assert\NotBlank(message: 'The nick cannot be empty.') ]
-    #[Assert\Length(min: 3, max: 100 , minMessage: 'The nick must be at least 3 characters long', maxMessage: 'The nick must be at most 100 characters long')]
+    #[Groups(['user:read', 'user:write', 'user:identifier', 'image:read', 'post:read','comment:read','viewuser:read'])]
+    #[Assert\NotBlank(message: 'The nick cannot be empty.')]
+    #[Assert\Length(min: 3, max: 100, minMessage: 'The nick must be at least 3 characters long', maxMessage: 'The nick must be at most 100 characters long')]
     private ?string $nick = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read', 'user:write', 'user:identifier','image:read'])]
-    #[Assert\Email (message: 'The email {{ value }} is not a valid email.')]
-    #[Assert\NotBlank (message: 'The email cannot be empty.')]
+    #[Groups(['user:read', 'user:write', 'user:identifier', 'image:read', 'post:read','comment:read','viewuser:read'])]
+    #[Assert\Email(message: 'The email {{ value }} is not a valid email.')]
+    #[Assert\NotBlank(message: 'The email cannot be empty.')]
     private ?string $email = null;
 
 
     #[ORM\Column(length: 255)]
     #[Groups(['user:read', 'user:write'])]
     #[Assert\NotBlank]
-    #[Assert\Length(min: 8, max: 255 , minMessage: 'The password must be at least 8 characters long', maxMessage: 'The password must be at most 255 characters long')]
-    #[Assert\Regex(pattern: "/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d-]{8,}$/" , message: 'The password must contain at least one uppercase letter, one lowercase letter and one number')]
+    #[Assert\Length(min: 8, max: 255, minMessage: 'The password must be at least 8 characters long', maxMessage: 'The password must be at most 255 characters long')]
+    #[Assert\Regex(pattern: "/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d-]{8,}$/", message: 'The password must contain at least one uppercase letter, one lowercase letter and one number')]
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read', 'user:write', 'user:identifier','image:read'])]
-    #[Assert\NotBlank (message: 'The image cannot be empty.')]
+    #[Groups(['user:read', 'user:write', 'user:identifier', 'image:read', 'post:read','comment:read','viewuser:read'])]
+    #[Assert\NotBlank(message: 'The image cannot be empty.')]
     private ?string $image = null;
 
     #[ORM\Column]
-    #[Groups(['user:read', 'user:write', 'user:identifier'])]
+    #[Groups(['user:read', 'user:write', 'user:identifier','viewuser:read'])]
     private ?\DateTimeImmutable $created_at = null;
 
     #[ORM\Column]
@@ -78,27 +78,33 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $remember_token = null;
 
     #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'user')]
-    
+
     private Collection $images;
 
     #[ORM\OneToMany(targetEntity: Like::class, mappedBy: 'user')]
-    
+
     private Collection $likes;
 
     #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'user')]
-    
+
     private Collection $comments;
 
-    
+    #[ORM\OneToMany(targetEntity: Follow::class, mappedBy: 'user')]
+    private Collection $followers;
+
+    #[ORM\OneToMany(targetEntity: Follow::class, mappedBy: 'following')]
+    private Collection $following;
 
     public function __construct()
     {
         $this->likes = new ArrayCollection();
         $this->images = new ArrayCollection();
         $this->comments = new ArrayCollection();
+        $this->followers = new ArrayCollection();
+        $this->following = new ArrayCollection();
     }
 
-    
+
 
 
     public function getId(): ?int
@@ -109,7 +115,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getRole(): ?string
     {
         $role = $this->role;
-        $role = 'ROLE_'.strtoupper($role);
+        $role = 'ROLE_' . strtoupper($role);
         return $role;
     }
 
@@ -319,44 +325,135 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    #[Groups(['user:read', 'user:write'])]
+    #[Groups(['user:read', 'user:write','viewuser:read'])]
     public function getImagesCount(): int
     {
 
         return count($this->images);
     }
 
-    #[Groups(['user:read', 'user:write'])]
+    #[Groups(['user:read', 'user:write','viewuser:read'])]
     public function getLikesCount(): int
     {
 
         return count($this->likes);
     }
 
-    #[Groups(['user:read', 'user:write'])]
+    #[Groups(['user:read', 'user:write','viewuser:read'])]
     public function getCommentsCount(): int
     {
 
         return count($this->comments);
     }
 
-    #[Groups([ 'user:read', 'user:identifier'])]
-    public function getRoles() : array
+    #[Groups(['user:read', 'user:identifier','viewuser:read'])]
+    public function getRoles(): array
     {
         $role = [$this->getRole()];
         return array_unique($role);
-        
+
     }
 
-    public function eraseCredentials() : void
+    public function eraseCredentials(): void
     {
-        
+
     }
 
-    public function getUserIdentifier() : string
+    public function getUserIdentifier(): string
     {
         return $this->email;
     }
 
-    
+    /**
+     * @return Collection<int, Follow>
+     */
+    public function getFollowers(): Collection
+    {
+        return $this->followers;
+    }
+
+    // public function addFollowers(Follow $follow): static
+    // {
+    //     if (!$this->followers->contains($follow)) {
+    //         $this->followers->add($follow);
+    //         $follow->setUser($this);
+    //     }
+
+    //     return $this;
+    // }
+
+    // public function removeFollowers(Follow $follow): static
+    // {
+    //     if ($this->followers->removeElement($follow)) {
+    //         // set the owning side to null (unless already changed)
+    //         if ($follow->getUser() === $this) {
+    //             $follow->setUser(null);
+    //         }
+    //     }
+
+    //     return $this;
+    // }
+
+    /**
+     * @return Collection|Follow[]
+     */
+    public function getFollowing(): Collection
+    {
+        return $this->following;
+    }
+
+    public function addFollowing(Follow $follow): static
+    {
+        if (!$this->following->contains($follow)) {
+            $this->following->add($follow);
+            $follow->setFollowing($this);
+        }
+
+        return $this;
+    }
+
+    // public function addFollowing(Follow $follow): static
+    // {
+    //     // Verificar si el usuario actual ya sigue al usuario objetivo
+    //     $existingFollow = $this->following->filter(function (Follow $existingFollow) use ($follow) {
+    //         return $existingFollow->getFollowing() === $follow->getFollowing();
+    //     });
+
+    //     if ($existingFollow->isEmpty()) {
+    //         $this->following->add($follow);
+    //         $follow->setFollowing($this);
+    //     }
+
+    //     return $this;
+    // }
+
+    // public function addFollowing(Follow $follow): static
+    // {
+    //     $this->following->add($follow);
+    //     $follow->setFollowing($this);
+
+    //     return $this;
+    // }
+
+
+    public function removeFollowing(Follow $follow): static
+    {
+        $this->following->removeElement($follow);
+        
+        return $this;
+    }
+
+    // public function removeFollowing(Follow $follow): static
+    // {
+    //     // Verificar si el usuario identificado es el propietario del seguimiento
+    //     if ($follow->getFollowing() === $this) {
+    //         $this->following->removeElement($follow);
+    //         // También puedes establecer el lado inverso a null aquí si es necesario
+    //     }
+
+    //     return $this;
+    // }
+
+
+
 }

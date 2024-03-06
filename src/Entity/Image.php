@@ -16,35 +16,39 @@ class Image
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['image:read', 'image:write', 'user:read', 'user:write'])]
+    #[Groups(['image:read', 'post:read', 'image:write', 'user:read', 'user:write'])]
     private ?int $id = null;
     
     #[ORM\ManyToOne(inversedBy: 'images')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['image:read', 'image:write',  'user:write'])]
+    #[Groups(['image:read','post:read', 'image:write',  'user:write'])]
     private ?User $user = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['image:read', 'image:write', 'user:read', 'user:write'])]
+    #[Groups(['image:read','post:read', 'image:write', 'user:read', 'user:write'])]
     private ?string $image_path = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['image:read', 'image:write', 'user:read', 'user:write'])]
+    #[Groups(['image:read','post:read', 'image:write', 'user:read', 'user:write'])]
     private ?string $description = null;
 
     #[ORM\Column]
-    #[Groups(['image:read', 'image:write', 'user:read', 'user:write'])]
+    #[Groups(['image:read','post:read', 'image:write', 'user:read', 'user:write'])]
     private ?\DateTimeImmutable $created_at = null;
 
     #[ORM\Column]
-    #[Groups(['image:read', 'image:write', 'user:read', 'user:write'])]
+    #[Groups(['image:read','post:read', 'image:write', 'user:read', 'user:write'])]
     private ?\DateTimeImmutable $updated_at = null;
 
     #[ORM\OneToMany(targetEntity: Like::class, mappedBy: 'image')]
     private Collection $likes;
 
     #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'image')]
+    #[Groups(['post:read'])]
     private Collection $comments;
+
+
+    private bool $likedByCurrentUser;
 
     public function __construct()
     {
@@ -177,7 +181,7 @@ class Image
         return $this;
     }
 
-    #[Groups(['user:read','image:read'])]
+    #[Groups(['user:read','image:read','post:read'])]
     public function getLikesCount() : int
     {
 
@@ -190,4 +194,45 @@ class Image
 
         return count($this->comments);
     }
+
+    public function setlikedByCurrentUser(
+        string $email
+        
+        ): static
+    {
+        
+           
+       
+
+        // 1000ms - 1200ms
+        $this->likedByCurrentUser = false;
+        $this->likes->filter(function ($like) use ($email) {
+
+            if ($like->getUser()->getEmail() === $email) {
+                $this->likedByCurrentUser = true;
+            }
+        });
+
+        // 3000ms - 3400ms
+        // $this->likedByCurrentUser = false;
+        // foreach ($this->likes as $like) {
+        //     if ($like->getUser()->getEmail() === $email) {
+        //         $this->likedByCurrentUser = true;
+        //     }
+        // }
+
+        return $this;
+    }
+
+    
+
+    
+    #[Groups(['user:read','image:read','post:read'])]
+    public function getlikedByCurrentUser( ) : bool
+    {
+        
+        return $this->likedByCurrentUser;
+    }
+
+
 }

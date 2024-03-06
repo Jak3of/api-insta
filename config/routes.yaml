@@ -29,6 +29,10 @@ app-user-id:
 api_login_check:
     path: /api/login
     methods: POST
+
+login_auth:
+    path: api/auth/
+    controller: App\Controller\HomeController::auth
     
 
 register:
@@ -50,3 +54,38 @@ get-posts:
     controller: App\Controller\ImageController::index
     defaults:
         page: 1
+
+get-posts-id:
+    path: /api/getpost/{id}
+    controller: App\Controller\ImageController::show
+
+
+like-post:
+    path: /api/like/{id}
+    controller: App\Controller\ImageController::like
+
+dislike-post:
+    path: /api/dislike/{id}
+    controller: App\Controller\ImageController::dislike
+
+comment-post:
+    path: /api/comment/{id}
+    controller: App\Controller\ImageController::comment
+    methods: POST
+
+public-user-nick:
+    path: /api/user/{nick}
+    controller: App\Controller\UserController::userNick
+
+user-posts:
+    path: /api/userposts/{id}
+    controller: App\Controller\UserController::userPosts
+
+user-exists:
+    path: /usersExists/{nick}
+    controller: App\Controller\UserController::userExists
+
+upload-image:
+    path: /api/upload
+    controller: App\Controller\ImageController::upload
+

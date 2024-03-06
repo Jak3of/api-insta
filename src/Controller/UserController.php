@@ -13,6 +13,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 
 use App\Entity\User;
+use App\Entity\Image;
 use Symfony\Component\Serializer\SerializerInterface;
 
 class UserController extends AbstractController
@@ -33,7 +34,7 @@ class UserController extends AbstractController
 
 
         $page = $request->get('page'); // Obtén el número de página de la consulta, por defecto es 1
-        $pageSize = 10; // Define cuántos usuarios quieres mostrar por página
+        $pageSize = 7; // Define cuántos usuarios quieres mostrar por página
 
         
 
@@ -55,11 +56,22 @@ class UserController extends AbstractController
 
         
         # $users = $this->entityManager->getRepository(User::class)->findAll();
-
+        
         $json = $this->serializer->serialize($users, 'json', ['groups' => ['user:read']]);
         
+        $response = [
+            'page' => $page,
+            'users' => json_decode($json)
+        ];
+        
+        $response['finalPage'] = ($page == ceil($paginator->count() / $pageSize));
+        
 
-        return new JsonResponse($json, Response::HTTP_OK, [], true);
+        
+        $response['firstPage'] = ($page == 1);
+        
+
+        return new JsonResponse($response, Response::HTTP_OK);
     }
 
     public function show(int $id): JsonResponse
@@ -74,6 +86,36 @@ class UserController extends AbstractController
             return new JsonResponse($json, Response::HTTP_OK, [], true);
         } else {
             return new JsonResponse( 'User not found', Response::HTTP_NOT_FOUND);
+        }
+    }
+
+    public function userPosts(int $id): JsonResponse
+    {
+
+
+        $images = $this->entityManager->getRepository(Image::class)->findBy(['user' => $id]);
+        $json = $this->serializer->serialize($images, 'json', ['groups' => ['image:read']]);
+        return new JsonResponse($json, Response::HTTP_OK, [], true);
+    }
+
+    public function userNick(Request $request): JsonResponse
+    {
+
+        $nick = $request->get('nick');
+        $user = $this->entityManager->getRepository(User::class)->findOneBy(['nick' => $nick]);
+        $json = $this->serializer->serialize($user, 'json', ['groups' => ['viewuser:read']]);
+        return new JsonResponse($json, Response::HTTP_OK, [], true);
+    }
+
+    public function userExists(Request $request): JsonResponse
+    {
+
+        $nick = $request->get('nick');
+        $user = $this->entityManager->getRepository(User::class)->findOneBy(['nick' => $nick]);
+        if ($user) {
+            return new JsonResponse(['exists' => true], Response::HTTP_OK);
+        } else {
+            return new JsonResponse(['exists' => false], Response::HTTP_OK);
         }
     }
 
